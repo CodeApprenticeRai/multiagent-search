@@ -93,17 +93,21 @@ class ReflexAgent(Agent):
         if ( ( currentDistanceToClosestGhost == 1 ) and ( sucessiveDistanceToClosestGhost < currentDistanceToClosestGhost ) ):
             return -1
 
+        if len( successorFoodList ) < len( currentFoodList ):
+            return  1.1
+
         currentDistanceToClosestPellet = float('inf')
         for pelletPosition in currentFoodList:
             currentDistanceToClosestPellet = min( currentDistanceToClosestPellet, util.manhattanDistance( pacmanCurrentPosition, pelletPosition) )
-
 
         sucessiveDistanceToClosestPellet = float('inf')
         for pelletPosition in successorFoodList:
             sucessiveDistanceToClosestPellet = min( sucessiveDistanceToClosestPellet, util.manhattanDistance( pacmanSuccessorPosition, pelletPosition) )
 
 
-        score = 1 / sucessiveDistanceToClosestPellet # / currentDistanceToClosestPellet # should never be inf as long as pellets exits ( and thus for games that end when there are no more pellets )
+        # score = 1 / sucessiveDistanceToClosestPellet # / currentDistanceToClosestPellet # should never be inf as long as pellets exits ( and thus for games that end when there are no more pellets )
+
+        score = 1 /  float( sucessiveDistanceToClosestPellet )
 
         #print score
         return score

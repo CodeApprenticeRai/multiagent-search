@@ -286,13 +286,64 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
     def getAction(self, gameState):
         """
-          Returns the expectimax action using self.depth and self.evaluationFunction
+          Returns the minimax action from the current gameState using self.depth
+          and self.evaluationFunction.
 
-          All ghosts should be modeled as choosing uniformly at random from their
-          legal moves.
+          Here are some method calls that might be useful when implementing minimax.
+
+          gameState.getLegalActions(agentIndex):
+            Returns a list of legal actions for an agent
+            agentIndex=0 means Pacman, ghosts are >= 1
+
+          gameState.generateSuccessor(agentIndex, action):
+            Returns the successor game state after an agent takes an action
+
+          gameState.getNumAgents():
+            Returns the total number of agents in the game
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        self.pacmanAgentIndex = 0
+
+        initialActionSpace = gameState.getLegalActions( self.pacmanAgentIndex )
+
+
+        indexOfBestAction = None
+        bestScore = -1 * float('inf')
+        for i in range( len(initialActionSpace) ):
+            successorState = gameState.generateSuccessor( self.pacmanAgentIndex, initialActionSpace[i] )
+            expectedScoreFromCurrentSuccessorState = self.minimize( successorState, self.depth, 1 )
+            if ( expectedScoreFromCurrentSuccessorState > bestScore ):
+                bestScore = expectedScoreFromCurrentSuccessorState
+                indexOfBestAction = i
+
+        return initialActionSpace[ indexOfBestAction ]
+
+
+    def maximize( self, currentState, depth ):
+        if ( (depth == 0) or currentState.isLose() or currentState.isWin() ):
+            return self.evaluationFunction(currentState)
+
+        bestScore = -1 * float("inf")
+        for action in currentState.getLegalActions(self.pacmanAgentIndex):
+            succesorState = currentState.generateSuccessor( self.pacmanAgentIndex, action )
+            bestScore = max( bestScore, self.minimize(succesorState, depth, 1 ) )
+
+        return bestScore
+
+    def minimize( self, currentState, depth, ghostIndex ):
+        if ( ( depth == 0) or currentState.isLose() or currentState.isWin()):
+            return self.evaluationFunction(currentState)
+
+        succesorStates = [ currentState.generateSuccessor(ghostIndex, action) for action in currentState.getLegalActions(ghostIndex) ]
+        scores = []
+        for succesorState in succesorStates:
+            if ( ghostIndex == ( currentState.getNumAgents() - 1 ) ):
+                scores.append( self.maximize( succesorState, depth - 1 ) )
+            else:
+                scores.append( self.minimize( succesorState, depth, ghostIndex + 1 ) )
+
+        return float( sum(scores) ) / len(scores)
+
 
 def betterEvaluationFunction(currentGameState):
     """
